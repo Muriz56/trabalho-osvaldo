@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labirinto das Sombras</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="title">🏰 LABIRINTO DAS SOMBRAS</div>
+    
+    <div class="hud">
+        <div class="score">
+            <span>💰</span>
+            <span id="score">0000</span>
+        </div>
+        <div class="lives" id="lives"></div>
+        <button onclick="restartGame()">REINICIAR</button>
+    </div>
+    
+    <div class="game-container">
+        <canvas id="game" width="600" height="600"></canvas>
+    </div>
+    
+    <!-- Controles mobile -->
+    <div class="controls" id="mobile-controls">
+        <div></div>
+        <button onclick="movePlayer(0, -1)">▲</button>
+        <div></div>
+        
+        <button onclick="movePlayer(-1, 0)">◀</button>
+        <button onclick="movePlayer(0, 1)">▼</button>
+        <button onclick="movePlayer(1, 0)">▶</button>
+    </div>
+    
+    <!-- Modal de Vitória -->
+    <div class="modal" id="win-modal">
+        <div class="modal-content">
+            <h1>🎉 VITÓRIA!</h1>
+            <p id="final-score">Pontuação: 1250</p>
+            <button onclick="restartGame()" style="padding: 15px 30px; font-size: 16px;">JOGAR NOVAMENTE</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
