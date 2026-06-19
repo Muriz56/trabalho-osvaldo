@@ -5,7 +5,6 @@ const TILE_SIZE = 40;
 const COLS = 15;
 const ROWS = 15;
 
-// 0 = chão, 1 = parede, 4 = armadilha, 5 = moeda, 3 = saída
 let maze = [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,2,0,0,4,0,0,1,5,0,0,0,0,0,1],
@@ -36,29 +35,16 @@ function findInitialCoins() {
     initialCoins.length = 0;
     for (let y = 0; y < ROWS; y++) {
         for (let x = 0; x < COLS; x++) {
-            if (maze[y][x] === 5) {
-                initialCoins.push({x, y});
-            }
+            if (maze[y][x] === 5) initialCoins.push({x, y});
         }
     }
 }
 
 function resetCoins() {
-    for (let coin of initialCoins) {
-        maze[coin.y][coin.x] = 5;
-    }
+    initialCoins.forEach(coin => maze[coin.y][coin.x] = 5);
 }
 
-// Controles
 let keys = {};
-
-window.addEventListener('keydown', e => {
-    keys[e.key.toLowerCase()] = true;
-});
-
-window.addEventListener('keyup', e => {
-    keys[e.key.toLowerCase()] = false;
-});
 
 function movePlayer(dx, dy) {
     if (gameOver || won) return;
@@ -67,30 +53,21 @@ function movePlayer(dx, dy) {
     const newY = player.y + dy;
     
     if (newX < 0 || newX >= COLS || newY < 0 || newY >= ROWS) return;
-    
-    const tile = maze[newY][newX];
-    
-    if (tile === 1) return; // parede
+    if (maze[newY][newX] === 1) return;
     
     player.x = newX;
     player.y = newY;
     
-    // Coleta de moeda
+    const tile = maze[newY][newX];
+    
     if (tile === 5) {
         score += 100;
         maze[newY][newX] = 0;
         updateHUD();
     }
     
-    // Armadilha
-    if (tile === 4) {
-        handleTrap();
-    }
-    
-    // Vitória
-    if (tile === 3) {
-        winGame();
-    }
+    if (tile === 4) handleTrap();
+    if (tile === 3) winGame();
     
     draw();
 }
@@ -102,20 +79,17 @@ function handleTrap() {
     if (lives <= 0) {
         gameOver = true;
         setTimeout(() => {
-            alert("💀 GAME OVER! Você perdeu todas as vidas.");
+            alert("💀 GAME OVER!");
             restartGame();
-        }, 300);
+        }, 200);
         return;
     }
     
-    // Teleporta para início
     player.x = 1;
     player.y = 1;
     
-    // Efeito visual
-    canvas.style.transition = 'filter 0.1s';
     canvas.style.filter = 'brightness(3)';
-    setTimeout(() => canvas.style.filter = 'none', 150);
+    setTimeout(() => canvas.style.filter = 'none', 200);
 }
 
 function winGame() {
@@ -133,28 +107,26 @@ function draw() {
             const px = x * TILE_SIZE;
             const py = y * TILE_SIZE;
             
+            // Chão
+            ctx.fillStyle = '#34495e';
+            ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(px + 8, py + 8, TILE_SIZE - 16, TILE_SIZE - 16);
+            
             if (tile === 1) {
                 ctx.fillStyle = '#2c3e50';
                 ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
-                ctx.fillStyle = '#34495e';
+                ctx.fillStyle = '#455a7a';
                 ctx.fillRect(px + 4, py + 4, TILE_SIZE - 8, TILE_SIZE - 8);
-            } else {
-                ctx.fillStyle = '#34495e';
-                ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
-                ctx.fillStyle = '#2c3e50';
-                ctx.fillRect(px + 8, py + 8, TILE_SIZE - 16, TILE_SIZE - 16);
             }
-            
             if (tile === 3) {
                 ctx.fillStyle = '#2ecc71';
                 ctx.fillRect(px + 8, py + 8, TILE_SIZE - 16, TILE_SIZE - 16);
             }
-            
             if (tile === 4) {
                 ctx.fillStyle = '#e67e22';
                 ctx.fillRect(px + 6, py + 6, TILE_SIZE - 12, TILE_SIZE - 12);
             }
-            
             if (tile === 5) {
                 ctx.fillStyle = '#f1c40f';
                 ctx.beginPath();
@@ -165,48 +137,47 @@ function draw() {
     }
     
     // Jogador
-    const px = player.x * TILE_SIZE + TILE_SIZE/2;
-    const py = player.y * TILE_SIZE + TILE_SIZE/2;
+    const px = player.x * TILE_SIZE + TILE_SIZE / 2;
+    const py = player.y * TILE_SIZE + TILE_SIZE / 2;
     
-    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.beginPath();
-    ctx.ellipse(px + 4, py + 8, TILE_SIZE/2.2, TILE_SIZE/5, 0, 0, Math.PI * 2);
+    ctx.ellipse(px + 5, py + 8, TILE_SIZE/2.3, TILE_SIZE/5, 0, 0, Math.PI*2);
     ctx.fill();
     
     ctx.fillStyle = '#e74c3c';
     ctx.beginPath();
-    ctx.arc(px, py, TILE_SIZE/2.3, 0, Math.PI * 2);
+    ctx.arc(px, py, TILE_SIZE/2.3, 0, Math.PI*2);
     ctx.fill();
     
     ctx.fillStyle = '#fff';
     ctx.beginPath();
-    ctx.arc(px - 8, py - 6, 6, 0, Math.PI * 2);
-    ctx.arc(px + 8, py - 6, 6, 0, Math.PI * 2);
+    ctx.arc(px - 8, py - 6, 6, 0, Math.PI*2);
+    ctx.arc(px + 8, py - 6, 6, 0, Math.PI*2);
     ctx.fill();
     
     ctx.fillStyle = '#2c3e50';
     ctx.beginPath();
-    ctx.arc(px - 8, py - 6, 3, 0, Math.PI * 2);
-    ctx.arc(px + 8, py - 6, 3, 0, Math.PI * 2);
+    ctx.arc(px - 8, py - 6, 3, 0, Math.PI*2);
+    ctx.arc(px + 8, py - 6, 3, 0, Math.PI*2);
     ctx.fill();
 }
 
 function updateHUD() {
     document.getElementById('score').textContent = String(score).padStart(4, '0');
-    
-    const livesContainer = document.getElementById('lives');
-    livesContainer.innerHTML = '';
+    const livesEl = document.getElementById('lives');
+    livesEl.innerHTML = '';
     for (let i = 0; i < lives; i++) {
         const heart = document.createElement('div');
         heart.className = 'life';
-        livesContainer.appendChild(heart);
+        livesEl.appendChild(heart);
     }
 }
 
 function gameLoop() {
     if (gameOver || won) return;
     
-    if (keys['arrowup'] || keys['w'])      movePlayer(0, -1);
+    if (keys['arrowup'] || keys['w']) movePlayer(0, -1);
     else if (keys['arrowdown'] || keys['s']) movePlayer(0, 1);
     else if (keys['arrowleft'] || keys['a']) movePlayer(-1, 0);
     else if (keys['arrowright'] || keys['d']) movePlayer(1, 0);
@@ -216,14 +187,10 @@ function gameLoop() {
 }
 
 function restartGame() {
-    player.x = 1;
-    player.y = 1;
+    player.x = 1; player.y = 1;
+    score = 0; lives = 3;
+    gameOver = false; won = false;
     resetCoins();
-    score = 0;
-    lives = 3;
-    gameOver = false;
-    won = false;
-    
     document.getElementById('win-modal').style.display = 'none';
     updateHUD();
     draw();
@@ -238,10 +205,14 @@ function init() {
     draw();
     gameLoop();
     
-    // Mostrar controles no mobile
     if ('ontouchstart' in window) {
         document.getElementById('mobile-controls').style.display = 'grid';
     }
 }
 
+// Event listeners
+window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+// Iniciar quando a página carregar
 window.onload = init;
